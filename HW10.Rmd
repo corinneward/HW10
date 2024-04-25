@@ -1,0 +1,80 @@
+---
+title: "HW10"
+output:
+  pdf_document: default
+  html_document: default
+date: "2024-04-18"
+---
+
+```{r, echo=FALSE, message=FALSE}
+redline = read.csv("redlining.csv")
+library(ggplot2)
+library(tidyverse)
+library(mosaic)
+library(MatchIt)
+library(moderndive)
+```
+Problem 1
+```{r, echo=FALSE}
+linear = lm(policies ~ minority + fire + age + income, data = redline)
+coef(linear)
+confint(linear, level = 0.95)
+```
+1) Question: 
+Is there an association between the number of FAIR policies and the racial composition of a ZIP code?
+
+2) Approach: 
+I fit a linear regression model to analyze the relationship between the number of FAIR policies and the percentage of minority residents while also accounting for other contributing variables, the number of fires per 100 houses in a zip code, the percent of houses built before WWII, and the median family income. 
+
+3) Results: 
+The model shows that the association between minority and number of policies is about .008 with the 95% confidence interval spanning from .002 to .014. This shows there is a relationship between policies and minority status that is seperate from the impact of fire, age, and income. 
+
+Problem 2
+```{r, echo = FALSE} 
+grocery = read.csv("groceries.csv")
+```
+Part A:     
+```{r, echo = FALSE}
+avgprice = aggregate(Price~Store, data = grocery, FUN = mean)
+avgprice = as.data.frame(avgprice)
+ggplot(avgprice)+
+  geom_bar(aes(x=Store, y = Price), stat = "identity") + coord_flip() + ggtitle("Average Price per Store")
+```
+This graph shows the average price across the entire store for each store in the data set. According to the graph, whole foods has the most expensive average price. 
+
+Part B: 
+```{r, echo = FALSE}
+products = table(grocery$Product)
+products = as.data.frame(products)
+ggplot(products)+
+  geom_bar(aes(x=Var1, y = Freq), stat = "identity") + coord_flip() + labs(y = "Number of Stores Selling Item", x = "Product Name", title = "Product Counts")
+```
+This graph shows the number of stores selling each product in the data set. According to the data, a cartoon of eggs and milk are sold at the most stores. 
+
+Part C: 
+```{r, echo=FALSE}
+linear = lm(Price ~ Product + Type, data = grocery)
+confint(linear, level = 0.95)
+```
+Compared with ordinary grocery stores (like Albertsons, HEB, or Krogers), convenience stores charge somewhere between 0.91 and 0.41 dollars more for the same product
+
+Part D: 
+```{r, echo = FALSE}
+lm(Price ~ Product + Store, data = grocery)
+```
+When comparing the same product, Whole Foods and Wheatsville have the two highest prices while Kroger Fresh Fare and Walmart are the cheapest. 
+
+Part E: 
+I think that Central Market and HEB charge similar amounts for the same product. Central Market subtracts .57 cents from our baseline while HEB subtracts .65 cents from our baseline. The difference is only about 8 cents which is not that big of a difference.
+
+Part F:
+```{r, echo=FALSE}
+pf = grocery%>%
+  mutate("Income10k" = (round((Income/10000),0)))
+pflm = lm(Price~Product + Income10k, data =pf)
+get_regression_table(pflm, conf.level = 0.95)
+```
+People in poorer zip codes pay more because less is subtracted from the baseline therefore the baseline price for products in their area is greater. 
+A one-standard deviation increase in the income of a ZIP code seems to be associated with a -0.016 standard-deviation change in the price that consumers in that ZIP code expect to pay for
+the same product.
+
